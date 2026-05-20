@@ -1,0 +1,26 @@
+name: Query Incident
+on:
+  workflow_dispatch:
+    inputs:
+      ticket:
+        description: SSHP ou IR numero
+        required: true
+        default: SSHP-1457458
+      question:
+        description: Pergunta tecnica
+        required: false
+        default: Qual a causa raiz e action items urgentes?
+jobs:
+  query:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          curl -s https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d "{\"model\":\"claude-sonnet-4-20250514\",\"max_tokens\":1024,\"messages\":[{\"role\":\"user\",\"content\":\"${{ github.event.inputs.ticket }}: ${{ github.event.inputs.question }}\"}]}" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['content'][0]['text'])"
