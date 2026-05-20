@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>IR-19027 · SSHP-1457458 · Impressão Duplicada MLB · NATIS</title>
+<style>
+:root{
+  --bg:#111217;--bg2:#1a1b23;--bg3:#24252f;--bg4:#2e3044;
+  --border:#2e3140;--border2:#3d4060;
+  --text:#e0e2ec;--text2:#9fa3c0;--text3:#6b6f8a;
+  --yellow:#FFE600;--yellow2:#cbb800;
+  --red:#F2495C;--orange:#FF780A;--blue:#5794F2;
+  --green:#73BF69;--purple:#B877D9;--teal:#64B0F2;
+  --red-bg:#1f1217;--orange-bg:#1e1508;
+  --card-radius:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;}
+a{color:var(--blue);text-decoration:none;}a:hover{text-decoration:underline;}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.topbar-logo{background:var(--yellow);color:#111;font-size:11px;font-weight:700;padding:3px 8px;border-radius:3px;white-space:nowrap;}
+.topbar-title{font-size:13px;font-weight:500;color:var(--text);}
+.topbar-sub{font-size:11px;color:var(--text3);}
+.topbar-badges{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:3px;}
+.badge-red{background:#1f1217;color:var(--red);border:1px solid var(--red);}
+.badge-green{background:#0f1f0e;color:var(--green);border:1px solid var(--green);}
+.badge-orange{background:#1e1508;color:var(--orange);border:1px solid var(--orange);}
+.badge-blue{background:#0f1624;color:var(--blue);border:1px solid var(--blue);}
+.badge-yellow{background:#1c1900;color:var(--yellow);border:1px solid var(--yellow2);}
+
+.main{padding:12px 16px;}
+.row{display:grid;gap:8px;margin-bottom:8px;}
+.row-7{grid-template-columns:repeat(7,1fr);}
+.row-2{grid-template-columns:1fr 1fr;}
+.row-3{grid-template-columns:1fr 1fr 1fr;}
+.row-1{grid-template-columns:1fr;}
+
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--card-radius);overflow:hidden;}
+.panel-header{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
+.panel-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;}
+.panel-icon{font-size:13px;color:var(--text3);}
+.panel-body{padding:10px 12px;}
+
+.stat-panel{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px 10px;text-align:center;min-height:70px;}
+.stat-label{font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+.stat-value{font-size:26px;font-weight:500;color:var(--text);line-height:1;}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:4px;}
+.stat-red{color:var(--red)!important;}
+.stat-orange{color:var(--orange)!important;}
+.stat-green{color:var(--green)!important;}
+.stat-yellow{color:var(--yellow)!important;}
+
+.alert-panel{padding:12px;border-left:3px solid;}
+.alert-red{border-left-color:var(--red);background:var(--red-bg);}
+.alert-orange{border-left-color:var(--orange);background:var(--orange-bg);}
+.alert-title{font-size:12px;font-weight:600;margin-bottom:6px;}
+.alert-red .alert-title{color:var(--red);}
+.alert-orange .alert-title{color:var(--orange);}
+.alert-body{font-size:12px;color:var(--text);line-height:1.6;}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.tag{font-size:10px;padding:1px 7px;border-radius:3px;border:1px solid var(--red);color:var(--red);background:transparent;}
+
+table.g{width:100%;border-collapse:collapse;font-size:12px;}
+table.g th{background:var(--bg3);color:var(--text2);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border2);}
+table.g td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;}
+table.g tr:last-child td{border-bottom:none;}
+table.g tr:hover td{background:var(--bg3);}
+.td-mono{font-family:monospace;font-size:11px;color:var(--yellow);font-weight:600;}
+.td-gray{color:var(--text3);}
+.td-red{color:var(--red);font-weight:600;}
+.td-orange{color:var(--orange);}
+.td-green{color:var(--green);}
+.td-blue{color:var(--blue);}
+
+.tl-time{font-family:monospace;font-size:11px;color:var(--yellow);font-weight:600;white-space:nowrap;}
+.tl-ev{font-size:12px;color:var(--text);}
+.tl-src{font-size:11px;color:var(--text3);}
+.hl{background:rgba(255,230,0,.06)!important;}
+.hl td{background:transparent!important;}
+
+.quote{padding:8px 10px;border-left:3px solid var(--blue);background:var(--bg3);margin-bottom:6px;border-radius:0 4px 4px 0;}
+.quote-text{font-size:12px;font-style:italic;color:var(--text);line-height:1.5;margin-bottom:3px;}
+.quote-meta{display:flex;gap:8px;align-items:center;}
+.quote-time{font-family:monospace;font-size:10px;color:var(--yellow);}
+.quote-person{font-size:10px;color:var(--text2);}
+
+.ai-section{padding:12px;}
+.ai-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.ai-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:12px;padding:8px 10px;outline:none;resize:none;font-family:inherit;}
+.ai-input:focus{border-color:var(--blue);}
+.ai-btns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.btn{background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:inherit;transition:.15s;}
+.btn:hover{background:var(--bg3);color:var(--text);}
+.btn-primary{background:var(--yellow);color:#111;border-color:var(--yellow);font-weight:600;}
+.btn-primary:hover{background:var(--yellow2);}
+.ai-response{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-top:10px;font-size:12px;color:var(--text);line-height:1.6;display:none;white-space:pre-wrap;}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border2);border-top-color:var(--yellow);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-2px;margin-right:5px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.site-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:3px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);margin:2px;}
+.action-row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+.action-num{font-size:11px;font-weight:700;min-width:18px;margin-top:1px;}
+.action-text{flex:1;font-size:12px;color:var(--text);line-height:1.5;}
+.action-tag{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;flex-shrink:0;}
+.tag-urgente{background:#1f1217;color:var(--red);border:1px solid var(--red);}
+.tag-alta{background:#1e1508;color:var(--orange);border:1px solid var(--orange);}
+.tag-media{background:#0f1624;color:var(--blue);border:1px solid var(--blue);}
+
+.footer{padding:10px 16px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+
+@media(max-width:768px){
+  .row-7{grid-template-columns:repeat(3,1fr);}
+  .row-2,.row-3{grid-template-columns:1fr;}
+  .topbar{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-logo">⚙ NATIS · IS Shipping</span>
+  <div>
+    <div class="topbar-title">Impressão Duplicada Zebra — Sorter/Labeling · MLB</div>
+    <div class="topbar-sub">SSHP-1457458 · CI-3751 · IR-19027 · 20/05/2026 · Condutor: Ignacio Ezequiel Pablo (SRE)</div>
+  </div>
+  <div class="topbar-badges">
+    <span class="badge badge-red">SEV-4</span>
+    <span class="badge badge-green">✓ Normalizado</span>
+    <span class="badge badge-orange">2ª Reincidência</span>
+    <span class="badge badge-blue">MLB · 21 sites</span>
+    <a href="https://mercadolibre.atlassian.net/wiki/x/hANEAAE" class="badge badge-yellow" target="_blank">ISSM ↗</a>
+    <a href="https://app.datadoghq.com/incidents/19027" class="badge badge-blue" target="_blank">IR-19027 ↗</a>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- STATS -->
+<div class="row row-7">
+  <div class="panel"><div class="stat-panel"><div class="stat-label">1º Reporte</div><div class="stat-value stat-red">04h35</div><div class="stat-sub">SRS4 Caxias do Sul</div></div></div>
+  <div class="panel"><div class="stat-panel"><div class="stat-label">War Room</div><div class="stat-value">05h03</div><div class="stat-sub">SEV-4 aberto</div></div></div>
+  <div class="panel"><div class="stat-panel"><div class="stat-label">Duração</div><div class="stat-value">2h06</div><div class="stat-sub">min total</div></div></div>
+  <div class="panel"><div class="stat-panel"><div class="stat-label">Sites MLB</div><div class="stat-value stat-red">21+</div><div class="stat-sub">afetados</div></div></div>
+  <div class="panel"><div class="stat-panel"><div class="stat-label">Pessoas</div><div class="stat-value">20</div><div class="stat-sub">war room</div></div></div>
+  <div class="panel" style="background:#1c1900;border-color:var(--yellow2)"><div class="stat-panel"><div class="stat-label">Trigger</div><div class="stat-value stat-yellow">04:30</div><div class="stat-sub">Job 365095</div></div></div>
+  <div class="panel" style="background:var(--red-bg);border-color:var(--red)"><div class="stat-panel"><div class="stat-label">Reincidência</div><div class="stat-value stat-red">2ª</div><div class="stat-sub">6 meses</div></div></div>
+</div>
+
+<!-- CAUSA RAIZ -->
+<div class="row row-1">
+  <div class="panel">
+    <div class="alert-panel alert-red">
+      <div class="alert-title">🔴 CAUSA RAIZ DEFINITIVAMENTE IDENTIFICADA — Drive (Planilha de Massivo) + Transcrição War Room (2h06min)</div>
+      <div class="alert-body"><strong>"Todas as localidades estão com a prioridade para WEBLINK e todas sofreram alto volume de impressões na SEGUNDA TENTATIVA"</strong><br/><br/>
+        <strong>ISGPROB-2138 NÃO foi implementado desde nov/2025.</strong> Mecanismo: Job 365095 (04:30) dispara 18 ETLs → WebSocket disconnects massivos → WebLink (primária) congestionada → Hybrid fallback ZPL processa (2ª tentativa) → WebLink também processa ao recuperar → <strong>2 prints = ETIQUETA DUPLICADA</strong>. Normalização espontânea quando pool de conexões se recupera.</div>
+      <div class="tags">
+        <span class="tag">ISGPROB-2138 não implementado</span>
+        <span class="tag">WebLink como capability primária</span>
+        <span class="tag">Trigger Job 365095 04:30</span>
+        <span class="tag">Cache app cliente bloqueou rollback</span>
+        <span class="tag">Serial number reset → 2 IDs</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE + EQUIPES -->
+<div class="row row-2">
+  <div class="panel">
+    <div class="panel-header"><span class="panel-icon">⟳</span><span class="panel-title">Linha do Tempo</span></div>
+    <div class="panel-body" style="padding:0">
+      <table class="g">
+        <thead><tr><th style="width:90px">Horário</th><th>Evento</th><th style="width:100px">Fonte</th></tr></thead>
+        <tbody id="tl"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-icon">👥</span><span class="panel-title">Equipes Envolvidas</span></div>
+    <div class="panel-body" style="padding:0">
+      <table class="g">
+        <thead><tr><th>Equipe</th><th>Entrada</th><th>Membros</th></tr></thead>
+        <tbody id="teams"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- REVELAÇÕES + ACTION ITEMS -->
+<div class="row row-2">
+  <div class="panel">
+    <div class="panel-header"><span class="panel-icon">💬</span><span class="panel-title">Revelações Chave da Transcrição</span></div>
+    <div class="panel-body" id="quotes"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-icon">✅</span><span class="panel-title">Action Items Priorizados</span></div>
+    <div class="panel-body" id="actions"></div>
+  </div>
+</div>
+
+<!-- SITES + LINKS -->
+<div class="row row-2">
+  <div class="panel">
+    <div class="panel-header"><span class="panel-icon">📍</span><span class="panel-title">Sites Afetados — 21+ MLB</span></div>
+    <div class="panel-body" id="sites"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-icon">🔗</span><span class="panel-title">Links Rápidos</span></div>
+    <div class="panel-body" style="padding:0">
+      <table class="g">
+        <thead><tr><th>Recurso</th><th>Link</th></tr></thead>
+        <tbody id="links"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- CLAUDE API -->
+<div class="row row-1">
+  <div class="panel">
+    <div class="panel-header"><span class="panel-icon">🤖</span><span class="panel-title">Consulta ao Assistente — Powered by Claude</span><span style="margin-left:auto;font-size:10px;color:var(--text3)">Digite o SSHP ou pergunta técnica e receba análise automática</span></div>
+    <div class="ai-section">
+      <div class="ai-label">Pergunta / Incidente</div>
+      <textarea class="ai-input" id="q" rows="2" placeholder="Ex: SSHP-1457458 · Qual a causa raiz? · Quais action items urgentes? · Explique o mecanismo da impressão duplicada..."></textarea>
+      <div class="ai-btns">
+        <button class="btn btn-primary" onclick="ask()">⚡ Analisar →</button>
+        <button class="btn" onclick="quick('Qual a causa raiz definitiva do IR-19027?')">Causa raiz</button>
+        <button class="btn" onclick="quick('Liste os action items urgentes com responsáveis')">Action items</button>
+        <button class="btn" onclick="quick('Resuma o war room CI-3751 em 5 pontos técnicos')">War room</button>
+        <button class="btn" onclick="quick('Explique o mecanismo técnico: WebLink + fallback ZPL + duplicidade')">Técnico</button>
+        <button class="btn" onclick="quick('O que foi decidido sobre o postmortem e PM assignment?')">PM policy</button>
+      </div>
+      <div class="ai-response" id="ans"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <span>Gerado por Claude (Anthropic) · Fontes: Drive · Confluence ISSM · Datadog · Slack · RFC-001 · ISGPROB-2133 · Transcrição 2h06min</span>
+  <span>NATIS · IS Shipping · MLB · 20/05/2026 · <a href="https://mercadolibre.atlassian.net/wiki/x/hANEAAE" target="_blank">ISSM Confluence ↗</a></span>
+</div>
+
+<script>
+const CTX=`Você é assistente de incidentes do Mercado Livre NATIS.
+
+INCIDENTE: SSHP-1457458 | CI-3751 | IR-19027 | MLB | 20/05/2026 | SEV-4
+
+CAUSA RAIZ CONFIRMADA:
+- Planilha Drive: "Todas as localidades com prioridade WEBLINK e todas sofreram alto volume de impressões na SEGUNDA TENTATIVA"
+- ISGPROB-2138 nunca implementado (mudar primária para ZPL em MLB)
+- Job 365095 (04:30) → 18 ETLs → WebSocket disconnects → WebLink congestionada → Fallback ZPL processa → WebLink também processa → 2 prints = DUPLICATA
+- Transcrição war room 2h06min: Benjamin Schell confirmou mudança repriorizacao 19/05 10:30; Pablo Rodriguez viu disconnects WebSocket 04:20; cache app cliente bloqueou rollback; normalizou espontaneamente
+- Serial number reset → 2 IDs simultâneos → conflito WebLink (Patrick Costa)
+- Backoffice sem duplicidade → bug nas apps cliente
+
+TIMELINE: 19/05 10:30 repriorizacao UCS | 04:20 SSP15 inicia op | 04:30 Job 365095 | 04:35 SRS4 (1º) | 05:03 War Room SEV-4 | 05:18 CI-3751 | 05:29 SRE assume | 05:55 rollback bloqueado | 06:30+ normalização | 07:04 encerrado
+
+EQUIPES: NATIS (Danillo/Thamiris/Patrick) | SRE (Ignacio) | UCS (Pablo/Benjamin) | NET (Diego) | NOC (Marcos/Angel) | Labels (Ruben) | Logistics (Carlos) | Gestão (Maximiliano/Marisa/Marcelo)
+
+ACTION ITEMS:
+1. ISGPROB-2138: primária ZPL em MLB [URGENTE - UCS/SRE]
+2. ISGPROB-2139: pool BD + não-bloqueante [URGENTE - UCS]
+3. Completar post-incident IR-19027 [URGENTE - SRE]
+4. Serial number reset → 2 IDs [ALTA - UCS]
+5. OpsGenie proativo NATIS BR-Métricas [ALTA - O11y]
+6. Teste Backoffice como 1º passo [ALTA - NATIS/SRE]
+7. Proteger Job 365095 vs WebSocket [ALTA - UCS/SRE]
+8. Revisar política PM [MÉDIA - Gestão]
+
+Responda em português, direto e técnico. Máximo 250 palavras.`;
+
+async function ask(){
+  const q=document.getElementById('q').value.trim();if(!q)return;
+  const ans=document.getElementById('ans');
+  ans.style.display='block';
+  ans.innerHTML='<span class="spinner"></span>Analisando...';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:CTX,messages:[{role:'user',content:q}]})});
+    const d=await r.json();
+    ans.textContent=d.content?.map(c=>c.text||'').join('')||'Sem resposta.';
+  }catch(e){ans.textContent='Erro: '+e.message;}
+}
+function quick(q){document.getElementById('q').value=q;ask();}
+
+const TL=[
+  {t:'19/05 10:30',e:'UCS aplica repriorizacao WebLink>ZPL para ~321 bodegas MLB',s:'UCS Config',hl:false},
+  {t:'04:20',e:'SSP15 inicia op. novo processo · WebSocket disconnects aumentam',s:'Israel/Pablo',hl:false},
+  {t:'04:30',e:'Job 365095 executa → 18 ETLs paralelos MLB',s:'UCS Config',hl:false},
+  {t:'04:35',e:'SRS4 Caxias do Sul — IS-1020158 — PRIMEIRO REPORTE',s:'Drive',hl:false},
+  {t:'04:37',e:'SRJ8 Niterói — IS-1020162',s:'Drive',hl:false},
+  {t:'04:46',e:'SSP15 São Vicente — IS-1020168',s:'Drive',hl:false},
+  {t:'04:47',e:'SSP34 Cotia — IS-1020177',s:'Drive',hl:false},
+  {t:'04:52',e:'SSP29 Mogi Mirim — IS-1020172 — padrão massivo identificado',s:'Drive',hl:false},
+  {t:'04:59',e:'🔴 INCIDENTE MASSIVO DECLARADO',s:'NATIS',hl:true},
+  {t:'05:03',e:'🔴 WAR ROOM SEV-4 — SSHP-1457458 — Danillo/Thamiris/Patrick',s:'Slack',hl:true},
+  {t:'05:06–41',e:'SSP4, SSP49, SRJ2, SBA2, SSP48, SSP31, SSP22, BRXSP16, SRJ1',s:'Drive',hl:false},
+  {t:'05:18',e:'SRE gera CI-3751 — publica no Slack',s:'Slack',hl:false},
+  {t:'05:29',e:'✅ SRE ASSUME CONDUÇÃO — Ignacio Ezequiel Pablo',s:'Transcrição',hl:true},
+  {t:'05:55',e:'Rollback 19624 preparado — cache da app cliente bloqueia',s:'Trans. 00:55',hl:false},
+  {t:'06:15+',e:'Reinício gradual → SSP4 normaliza (Marisa)',s:'Trans. 01:25',hl:false},
+  {t:'06:31',e:'SRS9 — último reporte IS-1020224',s:'Drive',hl:false},
+  {t:'~06:30',e:'✅ NORMALIZAÇÃO ESPONTÂNEA (sem ação)',s:'Trans. 01:33',hl:true},
+  {t:'07:04',e:'✅ WAR ROOM ENCERRADO — 2h06min',s:'Trans. 02:04',hl:true},
+];
+const tlEl=document.getElementById('tl');
+TL.forEach(r=>{
+  tlEl.innerHTML+=`<tr class="${r.hl?'hl':''}"><td class="tl-time">${r.t}</td><td class="tl-ev">${r.e}</td><td class="tl-src">${r.s}</td></tr>`;
+});
+
+const TEAMS=[
+  {n:'NATIS (IS)',t:'05h03',m:'Danillo · Thamiris · Patrick'},
+  {n:'NET',t:'05h16',m:'Diego Monteiro'},
+  {n:'NOC',t:'05h16',m:'Marcos Marion · Angel Gonzalez'},
+  {n:'UCS',t:'05h18',m:'Pablo Rodriguez · Benjamin Schell'},
+  {n:'SRE Shipping',t:'05h29',m:'Ignacio Ezequiel Pablo'},
+  {n:'Op SSP4',t:'06h04',m:'Marisa Fischer Vicente De Matos'},
+  {n:'Labels',t:'05h58',m:'Ruben Gocio'},
+  {n:'Logistics',t:'06h35',m:'Carlos David Camacho Panche'},
+  {n:'Gestão',t:'05h35+',m:'Maximiliano · Marcelo · André +5'},
+];
+const tmEl=document.getElementById('teams');
+TEAMS.forEach(t=>{
+  tmEl.innerHTML+=`<tr><td style="font-weight:600">${t.n}</td><td class="td-mono">${t.t}</td><td class="td-gray">${t.m}</td></tr>`;
+});
+
+const QUOTES=[
+  {t:'00:50:56',q:'Nosotros tuvimos un cambio en Weblink — ayer a las 10:30 — repriorización de la capability [Weblink sobre ZPL].',p:'Benjamin Schell (UCS)'},
+  {t:'00:36:19',q:'Estamos imprimiendo por Weblink en este momento. Taxa de erro 0.2–2% normal. Nenhum erro generalizado.',p:'Pablo Rodriguez (UCS)'},
+  {t:'01:10:43',q:'Impressões saindo por Weblink — após reinício a config não foi tomada. Cache da aplicação cliente.',p:'Benjamin Schell (UCS)'},
+  {t:'01:24:07',q:'Backoffice: imprimiu sem duplicidade. Bug está nas apps cliente, não no ucs-printer.',p:'Danillo / Israel'},
+  {t:'01:38:26',q:'Rede sem anomalias. Alto volume de disconnects/reconnects WebLink a partir de 04:20.',p:'Diego Monteiro / Pablo Rodriguez'},
+  {t:'01:49:20',q:'Impressora com 2 IDs simultâneos: serial reset após erro → novo dispositivo → conflito WebLink.',p:'Patrick Costa (NATIS)'},
+  {t:'01:57:53',q:'Pedido formal: não atribuir PM automaticamente ao UCS. Análise ainda incompleta.',p:'Benjamin Schell (UCS)'},
+];
+const qEl=document.getElementById('quotes');
+QUOTES.forEach(q=>{
+  qEl.innerHTML+=`<div class="quote"><div class="quote-text">"${q.q}"</div><div class="quote-meta"><span class="quote-time">${q.t}</span><span class="quote-person">— ${q.p}</span></div></div>`;
+});
+
+const ACTIONS=[
+  {t:'ISGPROB-2138: mudar capability primária para ZPL em MLB (WebLink fallback)',p:'URGENTE'},
+  {t:'ISGPROB-2139: aumentar pool BD + tornar status não-bloqueante',p:'URGENTE'},
+  {t:'Completar post-incident IR-19027 com análise técnica definitiva',p:'URGENTE'},
+  {t:'Resolver serial number reset → 2 IDs simultâneos em impressoras',p:'ALTA'},
+  {t:'Concluir alerta OpsGenie proativo NATIS — BR-Métricas (PENDENTE)',p:'ALTA'},
+  {t:'Implementar teste Backoffice como PRIMEIRO passo em incidentes',p:'ALTA'},
+  {t:'Proteger Job 365095 (04:30) contra WebSocket disconnects massivos',p:'ALTA'},
+  {t:'Revisar política de PM — pedido formal Benjamin Schell',p:'MÉDIA'},
+];
+const acEl=document.getElementById('actions');
+ACTIONS.forEach((a,i)=>{
+  const cls=a.p==='URGENTE'?'tag-urgente':a.p==='ALTA'?'tag-alta':'tag-media';
+  acEl.innerHTML+=`<div class="action-row"><span class="action-num td-mono">${i+1}</span><span class="action-text">${a.t}</span><span class="action-tag ${cls}">${a.p}</span></div>`;
+});
+
+const SITES=['SRS4 (04:35)','SRJ8 (04:37)','SSP15 (04:46)','SSP34 (04:47)','SSP29 (04:52)','SSP4 (05:06)','SSP49 (05:12)','SRJ2 (05:20)','SBA2 (05:28)','SSP48 (05:30)','SSP31 (05:33)','SSP22 (05:39)','BRXSP16 (05:40)','SRJ1 (05:41)','SRJ5 (06:24)','SRS9 (06:31)','SMG3','SMG11','SSP14','SSP46','XSC2/SSC9'];
+const sEl=document.getElementById('sites');
+SITES.forEach(s=>{sEl.innerHTML+=`<span class="site-tag">${s}</span>`;});
+
+const LINKS=[
+  ['ISSM Confluence (NATIS)','https://mercadolibre.atlassian.net/wiki/x/hANEAAE'],
+  ['SSHP-1457458','https://mercadolibre.atlassian.net/browse/SSHP-1457458'],
+  ['CI-3751 War Room SRE','https://shp-events.adminml.com/war-room-view/CI-3751'],
+  ['IR-19027 Bitácora Datadog','https://app.datadoghq.com/incidents/19027'],
+  ['Planilha de Massivo (Drive)','https://docs.google.com/spreadsheets/d/1AiuGmw0das6f-y8Gxz17epGIK0fVnOH-OW8IrqluUxc'],
+  ['Transcrição War Room 2h06min','https://docs.google.com/document/d/1J4B7g-VjC5J-7Mi_QKA9YmB3pvYm4SgprHAL9Ydi2yY/edit'],
+  ['Gravação MP4 (Drive)','https://drive.google.com/file/d/1bV_Uy1CxjNdlHg-1FlHEAtYnCOzxj6fR/view'],
+  ['Dashboard UCS Datadog','https://app.datadoghq.com/dashboard/kva-sfi-mpz/ucs-printers---printing'],
+  ['Postmortem ISGPROB-2133','https://mercadolibre.atlassian.net/wiki/spaces/MLPM/pages/3952378068'],
+  ['RFC-001 UCS-Printer','https://mercadolibre.atlassian.net/wiki/spaces/ISS/pages/4001693805'],
+];
+const lkEl=document.getElementById('links');
+LINKS.forEach(l=>{
+  lkEl.innerHTML+=`<tr><td style="font-weight:600;font-size:11px">${l[0]}</td><td><a href="${l[1]}" target="_blank" style="font-size:10px;word-break:break-all">${l[1]}</a></td></tr>`;
+});
+</script>
+</body>
+</html>
